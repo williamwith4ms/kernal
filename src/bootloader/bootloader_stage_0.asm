@@ -7,15 +7,28 @@ CALL printStr
 ; Disable interrupts
 CLI
 
-; load segmant registers
+; load segment registers
 XOR AX, ax
 MOV DS, AX
 MOV ES, AX
+MOV FS, AX
+MOV GS, AX
+
+; set stack pointer
 MOV SS, AX
 MOV SP, 0x7C00
 
+; print loading stage 2
 MOV DI, Loading2
 CALL printStr
+
+; Enable interrupts
+STI
+
+; reset disk controller
+MOV AH, 0x00
+MOV dl, 0x80
+INT 0x13
 
 ; load stage 1 to memory
 MOV AX, 2
