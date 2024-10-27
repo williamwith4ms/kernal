@@ -1,7 +1,7 @@
 [BITS 16]
 org 0x7C00
 
-MOV DI, Loading1
+MOV DI, Loading_stage_1 
 CALL printStr
 
 ; Disable interrupts 
@@ -18,9 +18,6 @@ MOV GS, AX
 MOV AX, 0x7000 ; stack starts at 0x7000
 MOV SS, AX 
 MOV SP, 0x7BFF ; stack grows downwards
-
-MOV DI, Loading_stage_1
-CALL printStr
 
 ; Enable interrupts
 STI 
