@@ -3,7 +3,7 @@
 SRC_DIR="src"
 BUILD_DIR=".build"
 STAGE0_ASM="bootloader/bootloader_stage_0.asm"
-STAGE1_ASM="bootloader/bootloader_stage_1_debug.asm"
+STAGE1_ASM="bootloader/bootloader_stage_1.asm"
 STAGE0_BIN="bootloader_stage_0.bin"
 STAGE1_BIN="bootloader_stage_1_debug.bin"
 DISK_IMAGE="bootable_disk.img"
