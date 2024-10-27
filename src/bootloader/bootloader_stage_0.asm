@@ -4,8 +4,8 @@ org 0x7C00
 MOV DI, Loading1
 CALL printStr
 
-; Disable interrupts
-;CLI
+; Disable interrupts 
+CLI
 
 ; load segment registers
 XOR AX, ax
@@ -15,52 +15,53 @@ MOV FS, AX
 MOV GS, AX
 
 ; set stack pointer
-MOV SS, AX
-MOV SP, 0x7BFF
+MOV AX, 0x7000 ; stack starts at 0x7000
+MOV SS, AX 
+MOV SP, 0x7BFF ; stack grows downwards
 
-; print loading stage 2
-;MOV DI, Loading2
-;CALL printStr
+MOV DI, Loading_stage_1
+CALL printStr
 
 ; Enable interrupts
-;STI
+STI 
 
 ; reset disk controller
-;MOV AH, 0x00
-;MOV DL, 0x00
-;INT 0x13
+MOV AH, 0x00
+;MOV DL, 0x00 ; passed from BIOS
+INT 0x13
 
-; load stage 1 to memory
-MOV AX, 0x7E00
+; location of stage 1
+MOV AX, 0x0000
 MOV ES, AX
-MOV BX, 0x0000
+MOV BX, 0x8000
 MOV AH, 0x02
 MOV AL, 0x01
 MOV CH, 0x00
-MOV CL, 0x01
+MOV CL, 0x02
 MOV DH, 0x00
-MOV DL, 0x00
 
+; load stage 1 to memory
 INT 0x13
 JC error
 
-CALL dumpMemory
+;CALL dumpMemory ; debug to seed if stage 1 is loaded correctly
 
-MOV DI, Loading2
+MOV DI, Jumping_stage_1
 CALL printStr
 ; jump to stage 1
-JMP 0x0000:0x7E00
+JMP 0x0000:0x8000
 
 MOV DI, JumpError ; if we get here, something went wrong
 CALL printStr 
+JMP halt
 
 ; Functions
 error:
-  ; if something goes wrong, hang
+  ; if something goes wrong, hang (me fr fr)
   MOV DI, ErrorMessage
   CALL printStr
-  CLI
-  HLT
+  CALL dumpMemory
+  JMP halt
 
 
 printChar:
@@ -68,8 +69,7 @@ printChar:
     MOV BH, 0x00 
     MOV BL, 0x07 
     INT 0x10     
-    RET
-
+    RET 
 
 printStr:
   nxtChar: 
@@ -83,7 +83,9 @@ printStr:
     RET
 
 dumpMemory:
-  MOV SI, 0x7E00
+  ; dump memory of 512 bytes starting at 0x8000
+  ; where stage 1 is loaded
+  MOV SI, 0x8000
   MOV CX, 512
 Loop:
   MOV AL, [SI]
@@ -112,12 +114,16 @@ printHexDigitDone:
   CALL printChar
   RET
 
+halt:
+  CLI
+  HLT
 
 ; Data
-Loading1 db 'Initializing system',0x0A,0x0D, 0
-Loading2 db 'Loading stage 1', 0x0A,0x0D, 0
+Loading_stage_1 db 'Loading stage 1', 0x0A,0x0D, 0
+Jumping_stage_1 db 'Jumping to stage 1', 0x0A,0x0D, 0
 ErrorMessage db 'Error loading stage 1', 0x0A, 0
 JumpError db 'Error jumping to stage 1', 0x0A, 0
+
 ; Boot Signature
 TIMES 510 - ($ - $$) db 0
 DW 0xAA55

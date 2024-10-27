@@ -1,5 +1,5 @@
 [BITS 16]
-ORG 0x7E00
+ORG 0x8000
 
 ; Debug message
 MOV DI, debug_start
